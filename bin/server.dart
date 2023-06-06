@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
@@ -7,7 +8,8 @@ import 'package:shelf_router/shelf_router.dart';
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
-  ..get('/echo/<message>', _echoHandler);
+  ..get('/echo/<message>', _echoHandler)
+  ..post('/login', login);
 
 Response _rootHandler(Request req) {
   return Response.ok('Hello, World!\n');
@@ -17,8 +19,6 @@ Response _echoHandler(Request request) {
   final message = request.params['message'];
   return Response.ok('$message\n');
 }
-
-
 
 void main(List<String> args) async {
   // Use any available host or container IP (usually `0.0.0.0`).
@@ -31,4 +31,14 @@ void main(List<String> args) async {
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
   final server = await serve(handler, ip, port);
   print('Server listening on port ${server.port}');
+}
+
+Future<Response> login(Request req) async {
+  final data = jsonDecode(await req.readAsString());
+  if (data['password'] != null) {
+    return Response.ok(jsonEncode({
+      "success": true,
+    }));
+  }
+  return Response.badRequest(body: jsonEncode({"error": "bad request"}));
 }
