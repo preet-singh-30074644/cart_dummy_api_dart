@@ -43,7 +43,8 @@ void main(List<String> args) async {
 
 Future<Response> login(Request req) async {
   final data = jsonDecode(await req.readAsString());
-  if (data['password'] != null) {
+  if ((data['password'] as String).isNotEmpty &&
+      (data['email'] as String).isNotEmpty) {
     return Response.ok(
         jsonEncode({
           "success": true,
